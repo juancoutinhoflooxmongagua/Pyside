@@ -14,6 +14,9 @@ if __name__ == "__main__":
     window.setWindowIcon(icon)
     app.setWindowIcon(icon)
 
+    display = Display()
+    window.addToVLayout(display)
+
     window.adjustFixedSize()
     window.show()
     app.exec()
