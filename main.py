@@ -20,6 +20,12 @@ if __name__ == "__main__":
     display = Display()
     window.addToVLayout(display)
 
+    button = Button("Texto do botão")
+    window.addToVLayout(button)
+
+    button2 = Button("Texto do botão")
+    window.addToVLayout(button2)
+
     window.adjustFixedSize()
     window.show()
     app.exec()
