@@ -15,16 +15,13 @@ if __name__ == "__main__":
     app.setWindowIcon(icon)
 
     info = Info("2.0 ^ 10.0 = 1024")
-    window.addToVLayout(info)
+    window.addWidgetToVLayout(info)
 
     display = Display()
-    window.addToVLayout(display)
+    window.addWidgetToVLayout(display)
 
-    button = Button("Texto do botão")
-    window.addToVLayout(button)
-
-    button2 = Button("Texto do botão")
-    window.addToVLayout(button2)
+    buttonsGrid = ButtonsGrid()
+    window.vLayout.addLayout(buttonsGrid)
 
     window.adjustFixedSize()
     window.show()
