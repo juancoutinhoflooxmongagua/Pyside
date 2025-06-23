@@ -31,7 +31,6 @@ class ButtonsGrid(QGridLayout):
         self.display = display
         self._makeGrid()
 
-    # Alteração: O método _makeGrid foi refatorado
     def _makeGrid(self):
         for row_number, row_data in enumerate(self._gridMask):
             for col_number, button_text in enumerate(row_data):
@@ -43,22 +42,19 @@ class ButtonsGrid(QGridLayout):
 
                 button = Button(button_text)
 
-                if not isNumOrDot(button_text):
+                # Alteração: Condição ajustada para não incluir botões vazios
+                if not isNumOrDot(button_text) and not isEmpty(button_text):
                     button.setProperty("cssClass", "specialButton")
 
-                # Nova função para configurar botões especiais
                 self._configSpecialButton(button)
                 self.addWidget(button, row_number, col_number)
 
-                # Conexão padrão (será sobrescrita em _configSpecialButton se necessário)
                 slot = self._makeSlot(self._insertButtonTextToDisplay, button)
                 self._connectButtonClicked(button, slot)
 
-    # Alteração: Novo método adicionado
     def _connectButtonClicked(self, button, slot):
-        button.clicked.connect(slot)  # type: ignore
+        button.clicked.connect(slot)
 
-    # Alteração: Novo método adicionado
     def _configSpecialButton(self, button):
         text = button.text()
 
@@ -72,14 +68,13 @@ class ButtonsGrid(QGridLayout):
 
         return realSlot
 
-    # Alteração: O conteúdo deste método foi removido
+    # Alteração: Funcionalidade restaurada para inserir o texto do botão
     def _insertButtonTextToDisplay(self, button):
-        return
+        button_text = button.text()
+        self.display.insert(button_text)
 
-    # Alteração: Método _clearDisplay foi renomeado e modificado
     def _clear(self):
         """Limpa o display."""
-        # O print abaixo foi adicionado na imagem, pode ser para debug
         print("Vou fazer outra coisa aqui")
         self.display.clear()
 
