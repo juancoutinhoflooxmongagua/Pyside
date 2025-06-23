@@ -45,6 +45,9 @@ class ButtonsGrid(QGridLayout):
         ]
         self._makeGrid()
 
+        # Conecta o sinal personalizado do display a um método nesta classe
+        self.display.eqRequested.connect(self.vouApagarVocê)
+
     def _makeGrid(self):
         for row_number, row_data in enumerate(self._gridMask):
             for col_number, button_text in enumerate(row_data):
@@ -89,6 +92,9 @@ class ButtonsGrid(QGridLayout):
             func(*args, **kwargs)
 
         return realSlot
+
+    def vouApagarVocê(self):
+        print('Signal recebido por "vouApagarVocê" em', type(self).__name__)
 
     def _insertButtonTextToDisplay(self, button):
         button_text = button.text()
@@ -163,21 +169,6 @@ class ButtonsGrid(QGridLayout):
         self._right = None
 
     def _makeDialog(self, text):
-        msgBox = self.window.makeMsgBox()
-        msgBox.setText(text)
-        return msgBox
-
-    def _showError(self, text):
-        msgBox = self._makeDialog(text)
-        msgBox.setIcon(msgBox.Icon.Critical)
-        msgBox.exec()
-
-    def _showInfo(self, text):
-        msgBox = self._makeDialog(text)
-        msgBox.setIcon(msgBox.Icon.Information)
-        msgBox.exec()
-
-       def _makeDialog(self, text):More actions
         msgBox = self.window.makeMsgBox()
         msgBox.setText(text)
         return msgBox
