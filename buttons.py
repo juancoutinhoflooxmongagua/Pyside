@@ -45,8 +45,12 @@ class ButtonsGrid(QGridLayout):
         ]
         self._makeGrid()
 
-        # Conecta o sinal personalizado do display a um método nesta classe
-        self.display.eqRequested.connect(self.vouApagarVocê)
+        # Conecta os sinais personalizados do display a um método nesta classe
+        # LINHA REMOVIDA: self.display.eqRequested.connect(self.vouApagarVocê)
+        # LINHAS ADICIONADAS:
+        self.display.eqPressed.connect(self.vouApagarVocê)
+        self.display.delPressed.connect(self.display.backspace)
+        self.display.clearPressed.connect(self.vouApagarVocê)
 
     def _makeGrid(self):
         for row_number, row_data in enumerate(self._gridMask):
