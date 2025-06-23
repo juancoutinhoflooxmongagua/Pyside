@@ -74,10 +74,17 @@ class ButtonsGrid(QGridLayout):
         self.display.insert(button_text)
 
     def _clear(self):
-        """Limpa o display."""
-        print("Vou fazer outra coisa aqui")
+        self._left = NoneMore actions
+        self._right = None
+        self._op = None
+        self.equation = self._equationInitialValue
         self.display.clear()
+        self._equationInitialValue = 'Sua conta'
+        self._left = None
+        self._right = None
+        self._op = None
 
+        self.equation = self._equationInitialValue
     def _backspace(self):
         self.display.backspace()
 
@@ -93,3 +100,22 @@ class ButtonsGrid(QGridLayout):
             self.display.setText(result)
         except Exception:
             self.display.setText("Error")
+
+     def _operatorClicked(self, button):More actions
+        buttonText = button.text()  # +-/* (etc...)
+        displayText = self.display.text()  # Deverá ser meu número _left
+        self.display.clear()  # Limpa o display
+
+        # Se a pessoa clicou no operador sem
+        # configurar qualquer número
+        if not isValidNumber(displayText) and self._left is None:
+            print('Não tem nada para colocar no valor da esquerda')
+            return
+
+        # Se houver algo no número da esquerda,
+        # não fazemos nada. Aguardaremos o número da direita.
+        if self._left is None:
+            self._left = float(displayText)
+
+        self._op = buttonText
+        self.equation = f'{self._left} {self._op} ??'
