@@ -29,7 +29,7 @@ class ButtonsGrid(QGridLayout):
         self.equation = self._equationInitialValue
 
         self._gridMask = [
-            ["C", "◀", "^", "/"],
+            ["C", "D", " ", "/"],
             ["7", "8", "9", "*"],
             ["4", "5", "6", "-"],
             ["1", "2", "3", "+"],
@@ -41,7 +41,7 @@ class ButtonsGrid(QGridLayout):
     def _makeGrid(self):
         for row_number, row_data in enumerate(self._gridMask):
             for col_number, button_text in enumerate(row_data):
-                if isEmpty(button_text):
+                if isEmpty(button_text) or button_text == " ":
                     placeholder = QPushButton("")
                     placeholder.setDisabled(True)
                     self.addWidget(placeholder, row_number, col_number)
@@ -67,11 +67,11 @@ class ButtonsGrid(QGridLayout):
 
         if text == "C":
             self._connectButtonClicked(button, self._clear)
-        elif text == "◀":
-            self._connectButtonClicked(button, self._backspace)
+        elif text == "D":
+            self._connectButtonClicked(button, self.display.backspace)
         elif text == "=":
             self._connectButtonClicked(button, self._eq)
-        elif text in "+-/*^":
+        elif text in "+-/*":
             self._connectButtonClicked(
                 button, self._makeSlot(self._operatorClicked, button)
             )
@@ -98,7 +98,7 @@ class ButtonsGrid(QGridLayout):
         self.display.backspace()
 
     def _operatorClicked(self, button):
-        buttonText = button.text()  # +-/* (etc...)
+        buttonText = button.text()
         displayText = self.display.text()
         self.display.clear()
 
@@ -106,7 +106,11 @@ class ButtonsGrid(QGridLayout):
             return
 
         if self._left is None:
-            self._left = float(displayText)
+            try:
+                self._left = float(displayText)
+            except ValueError:
+                self._clear()
+                return
 
         self._op = buttonText
         self.equation = f"{self._left} {self._op} ??"
@@ -117,15 +121,17 @@ class ButtonsGrid(QGridLayout):
         if not isValidNumber(displayText) or self._left is None or self._op is None:
             return
 
-        self._right = float(displayText)
+        try:
+            self._right = float(displayText)
+        except ValueError:
+            self._clear()
+            return
+
         self.equation = f"{self._left} {self._op} {self._right}"
         result = "error"
 
         try:
-            if "^" in self.equation:
-                result = math.pow(self._left, self._right)
-            else:
-                result = eval(self.equation)
+            result = eval(self.equation)
         except ZeroDivisionError:
             print("Zero Division Error")
         except OverflowError:
