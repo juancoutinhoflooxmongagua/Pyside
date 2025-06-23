@@ -1,8 +1,6 @@
 from display import Display
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QGridLayout, QPushButton
-
-# Alteração 1: Importado 'isValidNumber'
 from utils import isEmpty, isNumOrDot, isValidNumber
 from variables import MEDIUM_FONT_SIZE
 
@@ -17,8 +15,6 @@ class Button(QPushButton):
         font.setPixelSize(MEDIUM_FONT_SIZE)
         self.setFont(font)
         self.setMinimumSize(75, 75)
-        # Alteração 2: Linha removida
-        # self.setCheckable(True)
 
 
 class ButtonsGrid(QGridLayout):
@@ -35,8 +31,8 @@ class ButtonsGrid(QGridLayout):
         self.display = display
         self._makeGrid()
 
+    # Alteração: O método _makeGrid foi refatorado
     def _makeGrid(self):
-
         for row_number, row_data in enumerate(self._gridMask):
             for col_number, button_text in enumerate(row_data):
                 if isEmpty(button_text):
@@ -50,46 +46,47 @@ class ButtonsGrid(QGridLayout):
                 if not isNumOrDot(button_text):
                     button.setProperty("cssClass", "specialButton")
 
+                # Nova função para configurar botões especiais
+                self._configSpecialButton(button)
                 self.addWidget(button, row_number, col_number)
 
-                if button_text == "C":
-                    slot = self._makeSlot(self._clearDisplay)
-                elif button_text == "◀":
-                    slot = self._makeSlot(self._backspace)
-                elif button_text == "=":
-                    slot = self._makeSlot(self._calculate)
-                else:
-                    slot = self._makeSlot(self._insertButtonTextToDisplay, button)
+                # Conexão padrão (será sobrescrita em _configSpecialButton se necessário)
+                slot = self._makeSlot(self._insertButtonTextToDisplay, button)
+                self._connectButtonClicked(button, slot)
 
-                button.clicked.connect(slot)
+    # Alteração: Novo método adicionado
+    def _connectButtonClicked(self, button, slot):
+        button.clicked.connect(slot)  # type: ignore
+
+    # Alteração: Novo método adicionado
+    def _configSpecialButton(self, button):
+        text = button.text()
+
+        if text == "C":
+            self._connectButtonClicked(button, self._clear)
 
     def _makeSlot(self, func, *args, **kwargs):
-
         @Slot(bool)
         def realSlot(_):
             func(*args, **kwargs)
 
         return realSlot
 
-    # Alteração 3: Método completamente modificado
+    # Alteração: O conteúdo deste método foi removido
     def _insertButtonTextToDisplay(self, button):
-        buttonText = button.text()
-        newDisplayValue = self.display.text() + buttonText
+        return
 
-        if not isValidNumber(newDisplayValue):
-            return
-
-        self.display.insert(buttonText)
-
-    def _clearDisplay(self):
+    # Alteração: Método _clearDisplay foi renomeado e modificado
+    def _clear(self):
         """Limpa o display."""
+        # O print abaixo foi adicionado na imagem, pode ser para debug
+        print("Vou fazer outra coisa aqui")
         self.display.clear()
 
     def _backspace(self):
         self.display.backspace()
 
     def _calculate(self):
-
         expression = self.display.text()
         if not expression:
             return
