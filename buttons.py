@@ -1,3 +1,4 @@
+import math
 from display import Display
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QGridLayout, QPushButton
@@ -21,6 +22,12 @@ class ButtonsGrid(QGridLayout):
     def __init__(self, display: Display, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
+        self._equationInitialValue = "Sua conta"
+        self._left = None
+        self._right = None
+        self._op = None
+        self.equation = self._equationInitialValue
+
         self._gridMask = [
             ["C", "◀", "^", "/"],
             ["7", "8", "9", "*"],
@@ -42,15 +49,15 @@ class ButtonsGrid(QGridLayout):
 
                 button = Button(button_text)
 
-                # Alteração: Condição ajustada para não incluir botões vazios
                 if not isNumOrDot(button_text) and not isEmpty(button_text):
                     button.setProperty("cssClass", "specialButton")
 
                 self._configSpecialButton(button)
                 self.addWidget(button, row_number, col_number)
 
-                slot = self._makeSlot(self._insertButtonTextToDisplay, button)
-                self._connectButtonClicked(button, slot)
+                if isNumOrDot(button_text):
+                    slot = self._makeSlot(self._insertButtonTextToDisplay, button)
+                    self._connectButtonClicked(button, slot)
 
     def _connectButtonClicked(self, button, slot):
         button.clicked.connect(slot)
@@ -60,6 +67,14 @@ class ButtonsGrid(QGridLayout):
 
         if text == "C":
             self._connectButtonClicked(button, self._clear)
+        elif text == "◀":
+            self._connectButtonClicked(button, self._backspace)
+        elif text == "=":
+            self._connectButtonClicked(button, self._eq)
+        elif text in "+-/*^":
+            self._connectButtonClicked(
+                button, self._makeSlot(self._operatorClicked, button)
+            )
 
     def _makeSlot(self, func, *args, **kwargs):
         @Slot(bool)
@@ -68,74 +83,60 @@ class ButtonsGrid(QGridLayout):
 
         return realSlot
 
-    # Alteração: Funcionalidade restaurada para inserir o texto do botão
     def _insertButtonTextToDisplay(self, button):
         button_text = button.text()
         self.display.insert(button_text)
 
     def _clear(self):
-        self._left = NoneMore actions
+        self._left = None
         self._right = None
         self._op = None
         self.equation = self._equationInitialValue
         self.display.clear()
-        self._equationInitialValue = 'Sua conta'
-        self._left = None
-        self._right = None
-        self._op = None
 
-        self.equation = self._equationInitialValue
     def _backspace(self):
         self.display.backspace()
 
-    def _calculate(self):
-        expression = self.display.text()
-        if not expression:
-            return
-
-        expression = expression.replace("^", "**")
-
-        try:
-            result = str(eval(expression))
-            self.display.setText(result)
-        except Exception:
-            self.display.setText("Error")
-
-     def _operatorClicked(self, button):More actions
+    def _operatorClicked(self, button):
         buttonText = button.text()  # +-/* (etc...)
-        displayText = self.display.text()  # Deverá ser meu número _left
-        self.display.clear()  # Limpa o display
+        displayText = self.display.text()
+        self.display.clear()
 
-        # Se a pessoa clicou no operador sem
-        # configurar qualquer número
         if not isValidNumber(displayText) and self._left is None:
-            print('Não tem nada para colocar no valor da esquerda')
             return
 
-        # Se houver algo no número da esquerda,
-        # não fazemos nada. Aguardaremos o número da direita.
         if self._left is None:
             self._left = float(displayText)
 
         self._op = buttonText
-        self.equation = f'{self._left} {self._op} ??'
+        self.equation = f"{self._left} {self._op} ??"
 
-          def _eq(self):
+    def _eq(self):
         displayText = self.display.text()
-More actions
-        if not isValidNumber(displayText):
-            print('Sem nada para a direita')
+
+        if not isValidNumber(displayText) or self._left is None or self._op is None:
             return
 
         self._right = float(displayText)
-        self.equation = f'{self._left} {self._op} {self._right}'
-        result = 0.0
+        self.equation = f"{self._left} {self._op} {self._right}"
+        result = "error"
 
         try:
-            result = eval(self.equation)
+            if "^" in self.equation:
+                result = math.pow(self._left, self._right)
+            else:
+                result = eval(self.equation)
         except ZeroDivisionError:
-            print('Zero Division Error')
+            print("Zero Division Error")
+        except OverflowError:
+            print("Numero muito grande")
 
         self.display.clear()
-        self.info.setText(f'{self.equation} = {result}')
-        self._left = result
+        self.display.insert(str(result))
+
+        if result == "error":
+            self._left = None
+        else:
+            self._left = result
+
+        self._right = None
