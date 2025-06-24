@@ -1,14 +1,9 @@
 import sys
-from pathlib import Path
-
-FILE_DIR = Path(__file__).parent
-sys.path.append(str(FILE_DIR))
+from PySide6.QtWidgets import QApplication
+from PySide6.QtGui import QIcon
 
 from main_window import MainWindow
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication
 from variables import WINDOW_ICON_PATH
-
 from display import Display
 from info import Info
 from buttons import ButtonsGrid
