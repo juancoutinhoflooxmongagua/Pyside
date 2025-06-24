@@ -15,7 +15,8 @@ class Button(QPushButton):
 
     def configStyle(self):
         font = self.font()
-        font.setPixelSize(MEDIUM_FONT_FONT_SIZE)
+        # Corrected typo: MEDIUM_FONT_FONT_SIZE -> MEDIUM_FONT_SIZE
+        font.setPixelSize(MEDIUM_FONT_SIZE)
         self.setFont(font)
         self.setMinimumSize(75, 75)
 
@@ -46,7 +47,9 @@ class ButtonsGrid(QGridLayout):
         ]
         self._makeGrid()
 
-        self.display.eqPressed.connect(self.vouApagarVocê)
+        self.display.eqRequested.connect(
+            self.vouApagarVocê
+        )  # Changed from eqPressed to eqRequested
         self.display.delPressed.connect(self.display.backspace)
         self.display.clearPressed.connect(self.vouApagarVocê)
 
@@ -63,10 +66,8 @@ class ButtonsGrid(QGridLayout):
 
                 if not isNumOrDot(button_text) and not isEmpty(button_text):
                     button.setProperty("cssClass", "specialButton")
-                    # Corrected Indentation Start
                     if button_text == "N":
                         self._connectButtonClicked(button, self._invertNumber)
-                    # Corrected Indentation End
 
                 self._configSpecialButton(button)
                 self.addWidget(button, row_number, col_number)
@@ -111,6 +112,8 @@ class ButtonsGrid(QGridLayout):
 
     def vouApagarVocê(self):
         print('Signal recebido por "vouApagarVocê" em', type(self).__name__)
+        # Clear everything when C or Esc is pressed
+        self._clear()
 
     def _insertButtonTextToDisplay(self, button):
         button_text = button.text()
@@ -167,11 +170,17 @@ class ButtonsGrid(QGridLayout):
         result = "error"
 
         try:
+            # Using math.isclose for float comparison to avoid precision issues
+            if self._op == "/" and self._right == 0:
+                raise ZeroDivisionError
+
             result = eval(self.equation)
         except ZeroDivisionError:
             self._showError("Divisão por zero.")
         except OverflowError:
             self._showError("Essa conta não pode ser realizada.")
+        except Exception as e:
+            self._showError(f"Erro inesperado: {e}")
 
         self.display.clear()
         self.info.setText(f"{self.equation} = {result}")

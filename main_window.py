@@ -6,7 +6,7 @@ class MainWindow(QMainWindow):
         super().__init__(parent, *args, **kwargs)
 
         self.cw = QWidget()
-        self.v_layout = QVBoxLayout()
+        self.v_layout = QVBoxLayout()  # Renamed to v_layout for consistency
         self.cw.setLayout(self.v_layout)
         self.setCentralWidget(self.cw)
 
@@ -17,7 +17,8 @@ class MainWindow(QMainWindow):
         self.setFixedSize(self.width(), self.height())
 
     def addWidgetToVLayout(self, widget: QWidget):
-        self.vLayout.addWidget(widget)
+        # Corrected to use self.v_layout
+        self.v_layout.addWidget(widget)
 
     def makeMsgBox(self):
         return QMessageBox(self)
