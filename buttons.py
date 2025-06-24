@@ -4,7 +4,7 @@ from info import Info
 from main_window import MainWindow
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QGridLayout, QPushButton
-from utils import isEmpty, isNumOrDot, isValidNumber
+from utils import converToNumber, isEmpty, isNumOrDot, isValidNumber
 from variables import MEDIUM_FONT_SIZE
 
 
@@ -15,7 +15,7 @@ class Button(QPushButton):
 
     def configStyle(self):
         font = self.font()
-        font.setPixelSize(MEDIUM_FONT_SIZE)
+        font.setPixelSize(MEDIUM_FONT_FONT_SIZE)
         self.setFont(font)
         self.setMinimumSize(75, 75)
 
@@ -42,12 +42,10 @@ class ButtonsGrid(QGridLayout):
             ["4", "5", "6", "-"],
             ["1", "2", "3", "+"],
             ["", "0", ".", "="],
+            ["N", "0", ".", "="],
         ]
         self._makeGrid()
 
-        # Conecta os sinais personalizados do display a um método nesta classe
-        # LINHA REMOVIDA: self.display.eqRequested.connect(self.vouApagarVocê)
-        # LINHAS ADICIONADAS:
         self.display.eqPressed.connect(self.vouApagarVocê)
         self.display.delPressed.connect(self.display.backspace)
         self.display.clearPressed.connect(self.vouApagarVocê)
@@ -65,6 +63,10 @@ class ButtonsGrid(QGridLayout):
 
                 if not isNumOrDot(button_text) and not isEmpty(button_text):
                     button.setProperty("cssClass", "specialButton")
+                    # Corrected Indentation Start
+                    if button_text == "N":
+                        self._connectButtonClicked(button, self._invertNumber)
+                    # Corrected Indentation End
 
                 self._configSpecialButton(button)
                 self.addWidget(button, row_number, col_number)
@@ -96,6 +98,16 @@ class ButtonsGrid(QGridLayout):
             func(*args, **kwargs)
 
         return realSlot
+
+    @Slot()
+    def _invertNumber(self):
+        displayText = self.display.text()
+
+        if not isValidNumber(displayText):
+            return
+
+        number = converToNumber(displayText) * -1
+        self.display.setText(str(number))
 
     def vouApagarVocê(self):
         print('Signal recebido por "vouApagarVocê" em', type(self).__name__)
